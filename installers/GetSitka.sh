@@ -15,7 +15,7 @@ condafile="Miniforge3-$uname-$(uname -m).sh"
 logfile=GetSitka.log
 
 ## set list of conda packages to install from conda-forge
-cforge_pkgs="python==3.13.10 numpy=>2.3.0 scipy=>1.15 matplotlib=>3.10 h5py=>3.13 wxpython=>4.2.4"
+cforge_pkgs="python==3.13.10 numpy=>2.2.0 scipy=>1.15 matplotlib=>3.10 h5py=>3.13 wxpython=>4.2.4"
 unset CONDA_EXE CONDA_PYTHON_EXE CONDA_PREFIX PROJ_LIB
 
 ## get command line options
