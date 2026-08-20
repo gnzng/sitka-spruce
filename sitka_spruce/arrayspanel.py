@@ -14,9 +14,10 @@ DVSTYLE = dv.DV_SINGLE|dv.DV_VERT_RULES|dv.DV_ROW_LINES
 
 class ArraysPanel(wx.Panel):
     """Panel for Named Arrays"""
-    def __init__(self, parent, size=(700, 600)):
+    def __init__(self, parent, logger=None, size=(700, 600)):
         wx.Panel.__init__(self, parent, size=size)
         self.parent = parent
+        self.logger = logger
         self.SetBackgroundColour(get_color('sbg'))
 
         self.access_code = ''
@@ -168,7 +169,8 @@ class ArraysPanel(wx.Panel):
         except SyntaxError:
             fgcol = get_color('text_invalid')
             bgcol = get_color('text_invalid_bg')
-
+            if self.logger is not None:
+                self.logger.warn(f"invalid expression: '{expr}'")
         wexpr.SetForegroundColour(fgcol)
         wexpr.SetBackgroundColour(bgcol)
 

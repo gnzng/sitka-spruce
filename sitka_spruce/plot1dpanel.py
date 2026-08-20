@@ -16,9 +16,10 @@ from .data import ARRAY_TYPES, get_data, dim_code, datasize_repr
 
 class ArrayPlot1DPanel(wx.Panel):
     """Config Panel for 1D Plots of HDF5/Zarr datasets"""
-    def __init__(self, parent, size=(700, 600)):
+    def __init__(self, parent, logger=None, size=(700, 600)):
         wx.Panel.__init__(self, parent, size=size)
         self.parent = parent
+        self.logger = logger
         self.SetBackgroundColour(get_color('sbg'))
         self.SetFont(get_font())
         self.data_shape = None

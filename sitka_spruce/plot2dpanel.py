@@ -16,10 +16,10 @@ from .data import ARRAY_TYPES, get_data, dim_code, datasize_repr
 
 class ArrayImagePanel(wx.Panel):
     """Image Show Config Panel for HDF5/Zarr datasets"""
-    def __init__(self, parent, size=(700, 600)):
+    def __init__(self, parent, logger=None, size=(700, 600)):
         wx.Panel.__init__(self, parent, size=size)
         self.parent = parent
-
+        self.logger = logger
         self.SetFont(get_font())
         self.data_shape = None
         self.data_obj = None

@@ -12,6 +12,7 @@ from pathlib import Path
 
 from pyshortcuts import gformat, isotime
 
+from .logger import get_logger
 
 try:
     import larch
@@ -52,9 +53,10 @@ def get_opener(path):
         opener = FILE_OPENERS['zarr']
     return opener
 
-def get_sitka_files(folder=None):
+def get_sitka_files(folder=None, logger=None):
     """get sitka supported files from a foloder"""
     files = {}
+    write = logger.info if logger is not None else print
     if folder is not None:
         path = Path(folder)
         if path.exists() and path.is_dir():
@@ -66,7 +68,7 @@ def get_sitka_files(folder=None):
                         dset = opener(thispath.absolute(), mode='r')
                         files[thispath.name] = dset
                     except Exception:
-                        print(f"Warning: could not open {fname} with {opener}")
+                        write(f"Warning: could not open {fname} with {opener}")
     return files
 
 
@@ -312,11 +314,12 @@ class SitkaData:
     add_array     add an array by name
     eval          evaluate an expreesion or block of code with arrays/datasets
     """
-    def __init__(self):
+    def __init__(self, logger=None):
         self.datasets = {}
         self.arrays  = {}
         self.array_addrs  = {}
         self.array_shapes = {0: []}
+        self.logger  = get_logger() if logger is None else logger
         self._asteval = asteval.Interpreter(with_numpy=True,
                                 with_import=True, with_importfrom=True)
         self._asteval.symtable['datasets'] = self.datasets
@@ -327,21 +330,21 @@ class SitkaData:
 
     def add_array(self, name, data, address=None):
         """add array to interpreter, and keep track of its shape"""
-        # print("Add array ", name, data, address)
-        # remove existing value
-        if name in self.arrays:
-            oldval = self.arrays.pop(name)
-            dshape = 0
-            if isinstance(oldval, np.ndarray):
-                dshape = oldval.shape
-            # print("add_array ", name, dshape, self.array_shapes[dshape])
-            if name in self.array_shapes[dshape]:
-                self.array_shapes[dshape].remove(name)
-
-        # add new data array
         dshape = 0
         if isinstance(data, np.ndarray):
             dshape = data.shape
+
+        self.logger.info(f"Add array {name=} {address=} {dshape=}")
+        # remove existing value
+        if name in self.arrays:
+            oldval = self.arrays.pop(name)
+            oshape = 0
+            if isinstance(oldval, np.ndarray):
+                oshape = oldval.shape
+            if name in self.array_shapes[oshape]:
+                self.array_shapes[oshape].remove(name)
+
+        # add new data array
         if dshape not in self.array_shapes:
             self.array_shapes[dshape] = []
         self.array_shapes[dshape].append(name)
@@ -353,6 +356,7 @@ class SitkaData:
     def eval(self, str):
         out = self._asteval(str)
         if len(self._asteval.error) > 0:
+            self.logger.warn(f"error evaluating expression '{expr}'")
             self._last_error = [e for e in self._asteval.error]
             return None
         else:

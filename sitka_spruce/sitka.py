@@ -17,6 +17,7 @@ from wxutils import (SimpleText, pack,  LEFT,  get_color,
 
 from pyshortcuts import get_cwd, fix_filename, uname
 from .version import version
+from .logger import get_logger
 from .gui_utils import  get_font, FONTSIZE
 from .data  import (get_attributes, SitkaData, get_opener, get_sitka_files,
                     EPICS_NDATTR)
@@ -58,7 +59,9 @@ class SitkaFrame(wx.Frame):
                  title='Sitka Hierarchical Data Viewer for HDF5 and Zarr',
                  size=(1000, 675),  style=wx.DEFAULT_FRAME_STYLE):
         """Create Frame instance."""
-        self.data = SitkaData()
+        self.logger = get_logger()
+        self.data = SitkaData(logger=self.logger)
+
         self.wids = {}
         self.filename = None
         self.with_inspect = with_inspect
@@ -120,11 +123,13 @@ class SitkaFrame(wx.Frame):
                                on_change=self.onNBChanged,
                                size=(700, 625))
 
-        # self.mainpanel = ArrayViewPanel(splitter)
-        self.nb.AddPage(ArrayImagePanel(self), 'Image Display', True)
-        self.nb.AddPage(ArrayPlot1DPanel(self), 'XY Plot Display', True)
-        self.nb.AddPage(TablePanel(self), 'Table Display', True)
-        self.nb.AddPage(ArraysPanel(self), 'Named Arrays', True)
+        panels = {'Image Display': ArrayImagePanel,
+                  'XY Plot Display': ArrayPlot1DPanel,
+                  'Table Display': TablePanel,
+                  'Named Arrays': ArraysPanel,
+                  }
+        for title, _class in panels.items():
+            self.nb.AddPage(_class(self, logger=self.logger), title, True)
         self.nb.SetSelection(0)
         self.current_nbpage = self.nb.GetSelection()
         self.nb_pages = {}
@@ -146,8 +151,6 @@ class SitkaFrame(wx.Frame):
         sizer.Add(tpanel, 1, wx.ALL|wx.LEFT, 4)
         pack(rightpanel, sizer)
 
-        # print("Sitka: SBG ", get_color('sbg'))
-
         rightpanel.SetBackgroundColour(get_color('sbg'))
         self.rightpanel = rightpanel
         isize = 1 if uname.startswith('win')else 0
@@ -163,13 +166,11 @@ class SitkaFrame(wx.Frame):
         register_darkdetect(self.onDarkMode)
         self.onDarkMode()
 
-
         # Display the root item.
         self.tree.set_root(self.data.datasets)
         if self.tree.root is not None:
             self.tree.OnSelectionChanged()
-        # iconpath = Path(ICON_DIR, ICON_FILE).as_posix()
-        # self.SetIcon(wx.Icon(iconpath, wx.BITMAP_TYPE_ICO))
+
 
     def onCopyAddress(self, event=None):
         msg = 'Could not copy data address to Clipboard'
@@ -177,6 +178,7 @@ class SitkaFrame(wx.Frame):
             wx.TheClipboard.SetData(wx.TextDataObject(self.access_code))
             wx.TheClipboard.Close()
             msg = 'Copied data address to Clipboard'
+        self.logger.info(msg)
         self.status_message(msg)
 
     def onImportNamedArrays(self, event=None):
@@ -236,12 +238,11 @@ class SitkaFrame(wx.Frame):
             ipage, page = self.nb_pages.get(NDATTR_TITLE, (0, None))
             self.nb.SetSelection(ipage)
         else:
-            ipage, page = self.nb_pages.get('Image  Display', (0, None))
-            try:
-                if len(object.shape) == 1:
-                    ipage, page = self.nb_pages.get('XY Plot Display', (1, None))
-            except Exception:
-                pass
+            nshape = len(getattr(object, 'shape', []))
+            if nshape == 1:
+                ipage, page = self.nb_pages.get('XY Plot Display', (1, None))
+            else:
+                ipage, page = self.nb_pages.get('Image  Display', (0, None))
             self.nb.SetSelection(ipage)
 
         self.fill_info(filename, itemtype, itemname, object)
@@ -274,9 +275,7 @@ class SitkaFrame(wx.Frame):
                   self.nb, self.tpanel):
             w.SetBackgroundColour(bgcol)
             w.SetForegroundColour(fgcol)
-        
-        #self.info.SetAlternateRowColour(bgcol)
-        #self.info.SetOwnBackgroundColour(bgcol)
+
         self.nb.SetTabAreaColour(bgcol)
         wx.CallAfter(self.Refresh)
 
@@ -421,7 +420,7 @@ class SitkaFrame(wx.Frame):
 
         folder = Path(dlg.GetPath()).absolute().as_posix()
         dlg.Destroy()
-        for fname, dset in get_sitka_files(folder).items():
+        for fname, dset in get_sitka_files(folder, logger=self.logger).items():
             self.add_dataset(fname, dataset=dset)
 
     def add_dataset(self, name, dataset=None):
@@ -518,11 +517,6 @@ class SitkaFrame(wx.Frame):
             except Exception:
                 pass
             self.Destroy()
-        else:
-            try:
-                event.Veto()
-            except Exception:
-                pass
 
 class Sitka_App(wx.App, wx.lib.mixins.inspection.InspectionMixin):
     "simple app to wrap HDF5_Frame"

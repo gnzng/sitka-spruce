@@ -18,13 +18,14 @@ from .data import ARRAY_TYPES, dtype2str, get_data, dim_code, datasize_repr
 class DataGridFrame(wx.Frame):
     """Simple Data Grid Frame for HDF5/Zarr datasets"""
     def __init__(self, parent, size=(800, 600), title='Data Grid'):
-        wx.Frame.__init__(self, parent, title='Sitka Table',
+        wx.Frame.__init__(self, parent, logger=None, title='Sitka Table',
                           size=size, style=wx.DEFAULT_FRAME_STYLE)
 
         self.title = SimpleText(self, title, font=get_font(larger=1),
                                 colour='title_red', size=(500, -1),
                                 style=LEFT|wx.ALIGN_CENTER_VERTICAL)
 
+        self.logger = logger
         self.file_info = 'sitka', 'data'
         self.grid = Grid(self, size=size)
         self.grid.CreateGrid(100, 100)
@@ -45,9 +46,9 @@ class DataGridFrame(wx.Frame):
         self.SetBackgroundColour(bgcol)
         self.SetForegroundColour(fgcol)
         self.title.SetBackgroundColour(bgcol)
-        self.title.SetForegroundColour(fgcol)                
+        self.title.SetForegroundColour(fgcol)
         self.grid.SetBackgroundColour(bgcol)
-        self.grid.SetForegroundColour(fgcol)        
+        self.grid.SetForegroundColour(fgcol)
         wx.CallAfter(self.Refresh)
 
 
@@ -145,19 +146,19 @@ class DataGridFrame(wx.Frame):
         out.append('')
         with open(path, 'w') as fh:
             fh.write('\n'.join(out))
-        print("wrote ", path)
-
+        write = print if self.logger is None else self.logger.info
+        write(f" wrote {path}")
 
 
 
 class TablePanel(wx.Panel):
     """Config Panel for Grid Display of HDF5/Zarr datasets"""
-    def __init__(self, parent, size=(700, 600)):
+    def __init__(self, parent, logger=None, size=(700, 600)):
         wx.Panel.__init__(self, parent)
         self.parent = parent
         self.SetBackgroundColour(get_color('sbg'))
         self.SetFont(get_font())
-
+        self.logger = logger
         self.data_shape = None
         self.data_obj = None
         self.xsel_cur, self.ysel_cur = 0, 1
@@ -189,7 +190,6 @@ class TablePanel(wx.Panel):
                                       act_on_losefocus=False,
                                       action=self.onNameArray)
         wids['check_overwrite']  = Check(panel, ' ', size=(30, -1), default=True)
-
 
 
         def padd_text(text, dcol=1, size=(80, -1), newrow=True):
@@ -350,7 +350,7 @@ class TablePanel(wx.Panel):
         self.parent.status_message('fetching data....')
         data_thread.start()
 
-        frame_opts = {'title':  f'SitkaGrid {win} '}
+        frame_opts = {'title':  f'SitkaGrid {win} ', 'logger': self.logger}
         gframe = self.show_gridframe(win, **frame_opts)
         alabel = dim_code(reddim)
         self.parent.access_code = f"['{self.filename}']['{self.itemname}']{alabel}"
@@ -376,7 +376,7 @@ class TablePanel(wx.Panel):
         self.parent.status_message(f'got data ({dsize} of {osize}) in {dt_data:.2f} seconds')
         self.parent.data.add_array('_tabledat', self._griddat, address=self.parent.access_code)
 
-        # print(f"Got data {_nx=}  {_rx=}   {_ny=}  {_ry=}  {ydim=} {xdim=}")
+        self.logger.debug(f"Got data {_nx=}  {_rx=}   {_ny=}  {_ry=}  {ydim=} {xdim=}")
         if _ry == _nx and _rx == _ny or (ydim > xdim):
             self._griddat = self._griddat.transpose()
 
