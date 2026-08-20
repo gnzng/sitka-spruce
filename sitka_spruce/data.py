@@ -1,24 +1,17 @@
 import os
 import sys
-import numpy as np
 
+import asteval
 import hdf5plugin
 import h5py
 import zarr
 
-import asteval
-
+import numpy as np
 from pathlib import Path
 
 from pyshortcuts import gformat, isotime
 
 from .logger import get_logger
-
-try:
-    import larch
-except ImportError:
-    larch = None
-
 
 # epics epoch is Jan 1, 1990: offset to Unix Timestamp
 EPICS2UNIX_EPOCH = 631152000.0
@@ -28,7 +21,7 @@ FILE_OPENERS = {'hdf5': h5py.File, 'h5': h5py.File, 'zarr': zarr.open}
 COMMONTYPES = (int, float, complex, str, bytes, bool, list, tuple, np.ndarray)
 
 ARRAY_TYPES = ('h5py.Dataset', 'zarr.Array', 'ndarray')
-GROUP_TYPES = ('h5py.Group', 'zarr.Group', 'larch.Group')
+GROUP_TYPES = ('h5py.Group', 'zarr.Group')
 EPICS_NDATTR = 'entry/instrument/NDAttributes'
 
 # reverse map of hdf5plugin filters
@@ -113,14 +106,9 @@ def dtype2str(dtype):
 
 def get_items(obj):
     """return whether object is dict-like for tree"""
-    if (isinstance(obj, dict) or
-        (isinstance(obj, h5py.Group)) or
-        (larch is not None and isinstance(obj, larch.Group))):
-        return {key: val for key, val in obj.items()}
-    if isinstance(obj, zarr.Group):
-        return {key: obj[key] for key in obj.keys()}
-    elif (isinstance(obj, h5py.Dataset) or
-          isinstance(obj, zarr.Array)):
+    if isinstance(obj, (dict, h5py.Group, zarr.Group)):
+        return {key: obj[key] for key in obj}
+    elif isinstance(obj, (h5py.Dataset, zarr.Array)):
         return obj
 
 def array2isotimes(arr, timespec='microseconds', is_epics=False):
@@ -144,8 +132,6 @@ def get_itemtype(obj):
     itemtype = None
     if isinstance(obj, dict):
         itemtype = 'dict'
-    elif larch is not None and isinstance(obj, larch.Group):
-        itemtype = 'larch.Group'
     elif isinstance(obj, h5py.Group):
         itemtype = 'h5py.Group'
     elif isinstance(obj, zarr.Group):
@@ -223,8 +209,7 @@ def get_attributes(obj, itemname):
 
 def datasize_repr(obj):
     """return string-representation of data size"""
-    if (isinstance(obj, h5py.Dataset) or
-        isinstance(obj, np.ndarray)):
+    if isinstance(obj, (h5py.Dataset, np.ndarray)):
         nbytes = obj.nbytes
     else:
         nbytes = sys.getsizeof(obj)
@@ -356,7 +341,7 @@ class SitkaData:
     def eval(self, str):
         out = self._asteval(str)
         if len(self._asteval.error) > 0:
-            self.logger.warn(f"error evaluating expression '{expr}'")
+            self.logger.warning(f"error evaluating expression '{str}'")
             self._last_error = [e for e in self._asteval.error]
             return None
         else:

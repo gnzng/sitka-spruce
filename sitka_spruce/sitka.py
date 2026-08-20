@@ -27,10 +27,7 @@ from .plot2dpanel import ArrayImagePanel
 from .tablepanel import TablePanel
 from .arrayspanel import ArraysPanel
 from .ndattrpanel import NDAttrsPanel
-try:
-    import larch
-except ImportError:
-    larch = None
+
 
 FILE_WILDCARD = 'HDF5/Zarr files(*.hdf5;*.h5;*.zarr)|*.hdf5;*.h5;*.zarr|All files (*.*)|*.*'
 
