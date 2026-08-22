@@ -161,16 +161,16 @@ class ArraysPanel(wx.Panel):
     def onExpr(self, evt=None, value=None):
         wexpr = self.wids['expr']
         if value is None:
-            value = wexpr.GetValue()
+            expr = wexpr.GetValue()
         try:
-            ast.parse(value)
+            ast.parse(expr)
             fgcol = get_color('text')
             bgcol = get_color('sbg')
         except SyntaxError:
             fgcol = get_color('text_invalid')
             bgcol = get_color('text_invalid_bg')
             if self.logger is not None:
-                self.logger.warn(f"invalid expression: '{expr}'")
+                self.logger.warning(f"invalid expression: '{expr}'")
         wexpr.SetForegroundColour(fgcol)
         wexpr.SetBackgroundColour(bgcol)
 
@@ -208,7 +208,7 @@ class ArraysPanel(wx.Panel):
         if array is not None:
             title = self.parent.data.array_addrs.get(name, name)
             if len(array.shape) == 1:
-                ipage, page = self.parent.get_page('Plot1DPanel')
+                _, page = self.parent.get_page('Plot1DPanel')
                 if page is not None:
                     frame = page.show_plotframe(window=1)
                     _x = np.arange(len(array))
@@ -218,7 +218,7 @@ class ArraysPanel(wx.Panel):
                     frame.Raise()
             elif (len(array.shape) == 2 or
                   (len(array.shape) == 3 and array.shape[2] == 3)):
-                ipage, page = self.parent.get_page('ImagePanel')
+                _, page = self.parent.get_page('ImagePanel')
                 if page is not None:
                     frame = page.show_imageframe(window=1)
                     frame.display(array, title=f'{name}: {title}')

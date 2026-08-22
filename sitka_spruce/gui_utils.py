@@ -68,7 +68,7 @@ def call_signature(obj):
         if iarg < ioff:
             fargs.append(arg)
         else:
-            fargs.append(f"{arg}={repr(argspec.defaults[iarg-ioff])}")
+            fargs.append(f"{arg}={argspec.defaults[iarg-ioff]}")
     if keywords is not None:
         fargs.append(f"**{keywords}")
 

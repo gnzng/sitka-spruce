@@ -12,16 +12,14 @@ class NumericCombo(wx.ComboBox):
     """
     Numeric Combo: ComboBox with numeric-only choices
     """
-    def __init__(self, parent, choices, precision=1, fmt=None,
+    def __init__(self, parent, choices, precision=1,
                  init=0, default_val=None, width=80, action=None):
 
-        self.fmt = fmt
-        if fmt is None:
-            self.fmt = "%%.%if" % precision
+        self.prec = precision
 
         self.action = action
         self.choices  = choices
-        schoices = [self.fmt % i for i in self.choices]
+        schoices = [f'{x:.{self.prec}f}' for x in self.choices]
         wx.ComboBox.__init__(self, parent, -1, '', (-1, -1), (width, -1),
                              schoices, wx.CB_DROPDOWN|wx.TE_PROCESS_ENTER)
 
@@ -48,14 +46,14 @@ class NumericCombo(wx.ComboBox):
             self.choices.append(val)
         self.choices.sort()
         self.Clear()
-        self.AppendItems([self.fmt % x for x in self.choices])
+        self.AppendItems([f'{x:.{self.prec}f}' for x in self.choices])
         if select:
             self.SetSelection(self.choices.index(val))
             if self.action is not None:
                 self.action(val)
 
 
-class DimReduceWidgets():
+class DimReduceWidgets:
     """panel for selecting how to reduce array dimension to scalar"""
     def __init__(self, parent, npts=1, options=None, callback=None):
         self.wids = {}

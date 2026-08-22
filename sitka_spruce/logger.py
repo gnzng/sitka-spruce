@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Handling loggers
 """
@@ -30,12 +28,10 @@ def getFileHandler(filename, mode="a"):
     return file_handler
 
 
-class ConsolerFormatter(logging.Formatter):
+class ConsoleFormatter(logging.Formatter):
     """Colored logging formatter intended for the console output"""
     def format(self, record):
-        logging.Formatter(_FORMAT)
-        return formatter.format(record)
-
+        return logging.Formatter(_FORMAT).format(record)
 
 def getConsoleHandler():
     """Default console handler"""
@@ -69,7 +65,7 @@ def get_logger(name='sitka', level="INFO"):
 
 def test_logger(level="DEBUG"):
     """Test custom logger"""
-    logger = getLogger("sitka test logger", level=level)
+    logger = logging.getLogger("sitka test logger", level=level)
     logger.debug("This is a debug message")
     logger.info("This is an info message")
     logger.warning("This is a warning message")

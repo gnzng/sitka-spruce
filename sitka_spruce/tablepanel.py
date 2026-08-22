@@ -17,8 +17,8 @@ from .data import ARRAY_TYPES, dtype2str, get_data, dim_code, datasize_repr
 
 class DataGridFrame(wx.Frame):
     """Simple Data Grid Frame for HDF5/Zarr datasets"""
-    def __init__(self, parent, size=(800, 600), title='Data Grid'):
-        wx.Frame.__init__(self, parent, logger=None, title='Sitka Table',
+    def __init__(self, parent, logger=None, size=(800, 600), title='Data Grid'):
+        wx.Frame.__init__(self, parent, title='Sitka Table',
                           size=size, style=wx.DEFAULT_FRAME_STYLE)
 
         self.title = SimpleText(self, title, font=get_font(larger=1),
@@ -75,11 +75,10 @@ class DataGridFrame(wx.Frame):
             self.grid.AppendCols(2)
             self.grid.SetColLabelValue(0, ' Name ')
             self.grid.SetColLabelValue(1, ' Value ')
-            i = 0
-            for key, val in rdat.items():
+            for i, key in enumerate(rdat):
                 self.grid.SetCellValue(i, 0, key)
-                self.grid.SetCellValue(i, 1, val)
-                i += 1
+                self.grid.SetCellValue(i, 1, rdat[key])
+
             self.grid.AutoSizeColumn(0)
             self.grid.AutoSizeColumn(1)
         else:

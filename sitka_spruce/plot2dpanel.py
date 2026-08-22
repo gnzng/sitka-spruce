@@ -425,9 +425,9 @@ class ArrayImagePanel(wx.Panel):
             self.parent.status_message('RGB image displayed successfully')
 
         except Exception as e:
-            Popup(self, f'Error combining RGB channels:\n{str(e)}',
+            Popup(self, f'Error combining RGB channels:\n{e}',
                   'RGB Display Error')
-            self.parent.status_message(f'RGB display error: {str(e)}')
+            self.parent.status_message(f'RGB display error: {e}')
 
     def make_rgb(self, channels):
         """Combine selected channels into an RGB image

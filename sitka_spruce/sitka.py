@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 sitka_spruce HDF5 and Zarr data browser
 """
@@ -474,7 +473,7 @@ class SitkaFrame(wx.Frame):
         SelectWorkdir(self)
 
     def onExportInfo(self, event=None):
-        (filename, itemname, itemtype) =  self.file_info
+        (filename, itemname, _) =  self.file_info
         oname = fix_filename(f'{filename}_{itemname}_info.tsv')
 
         path = FileSave(self, 'Save Attribute Table to Tab-separated File',
