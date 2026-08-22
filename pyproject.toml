@@ -12,6 +12,7 @@ include = ["sitka_spruce"]
 [tool.coverage.run]
 omit = ["tests/*"]
 
+
 [project]
 name = "sitka_spruce"
 dynamic = ["version"]
@@ -84,4 +85,9 @@ test = ["pytest", "pytest-cov", "coverage"]
 all = ["sitka_spruce[dev, doc, test]"]
 
 [tool.ruff]
-exclude = ['sitka_spruce/__init__.py', 'sitka_spruce/version.py']
+exclude = ['sitka_spruce/__init__.py', 'sitka_spruce/version.py',
+           'sandbox','doc', 'dist', 'build', 'examples']
+line-length = 95
+
+[tool.ruff.lint]
+ignore = ['BLE001', 'I001']  # 'except Exception, order of imports
