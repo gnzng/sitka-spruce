@@ -138,6 +138,7 @@ class ArrayPlot1DPanel(wx.Panel):
             self.dim_reduce.enable_dimension(cur, enable=False, npts=None)
             aname = itemname.split('/')[-1]
             self.wids['array_name'].SetValue(aname)
+            self.update_array_choices()
 
         self.wids['yarray'].Enable(isdata)
         self.Refresh()

@@ -288,7 +288,7 @@ class ArrayImagePanel(wx.Panel):
 
                 aname = itemname.split('/')[-1]
                 self.wids['array_name'].SetValue(aname)
-
+            self.update_array_choices()
         self.Refresh()
 
 
