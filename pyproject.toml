@@ -79,7 +79,8 @@ doc = ["sphinx",
        "sphinx-design",
        "sphinxcontrib-video",
        "jupyter_sphinx",
-       "nbsphinx"]
+       "nbsphinx", 
+       "sphinx-breeze-theme"]]
 
 test = ["pytest", "pytest-cov", "coverage"]
 all = ["sitka_spruce[dev, doc, test]"]

@@ -15,11 +15,11 @@ from packaging.version import parse as version_parse
 import sitka_spruce
 
 project = 'Sitka Spruce'
-copyright = f'{date.today()}, Matthew Newville, The University of Chicago'
+copyright = f'{date.today().year}, Matthew Newville, The University of Chicago'
 
 release = version_parse(sitka_spruce.__version__).base_version
 
-html_title = "Sitka Spruce: Heirarchical Data Browser"
+html_title = "Sitka Spruce: Hierarchical Data Browser"
 html_short_title = "Sitka Spruce"
 
 # sys.path.append(os.path.abspath(os.path.join('.')))
@@ -30,8 +30,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinxcontrib.video',
               'sphinx_copybutton',
               "sphinx_design",
-              "nbsphinx" ]
-
+              "nbsphinx"
+]
 
 # autoclass_content = 'both'
 templates_path = ['_templates']
@@ -44,20 +44,11 @@ add_module_names = True
 
 pygments_style = 'sphinx'
 
-html_theme_path = ['sphinx_theme']
-html_theme = 'bizstyle'
-# html_theme = "pydata_sphinx_theme"
+# html_theme_path = ['sphinx_theme']
 
-# html_theme_options = {
-#     "github_url": "https://github.com/xraypy/sitka-spruce",
-#     "header_links_before_dropdown": 8,
-#     "logo": {
-#         "alt_text": "sitka_spuce",
-#         "image_dark": "_static/sitka_logo.png",
-#     },
-#     "navigation_with_keys": True,
-#     "show_toc_level": 2,
-# }
+html_theme = 'breeze'
+html_theme_options = {"external_links": ["https://github.com/xraypy/sitka-spruce"]}
+
 
 html_logo = "_static/sitka_logo.png"
 html_static_path = ['_static']
