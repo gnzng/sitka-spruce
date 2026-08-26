@@ -36,8 +36,9 @@ def get_opener(path):
         path = Path(path)
 
     opener = None
-    if path.suffix in FILE_OPENERS:
-        opener = FILE_OPENERS[path.suffix]
+    suffix = path.suffix.lower().lstrip('.')
+    if suffix in FILE_OPENERS:
+        opener = FILE_OPENERS[suffix]
     elif h5py.is_hdf5(path):
         opener = FILE_OPENERS['h5']
     elif (path.exists() and path.is_dir() and   # home-built 'is_zarr'
